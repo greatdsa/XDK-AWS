@@ -68,7 +68,7 @@
 #define HOST_NAME "ac7j26n72nlys.iot.us-west-2.amazonaws.com"
 #define CA_FILE_NAME "ca.der"
 #define PRIVATE_FILE_NAME "9877620cec-private.pem.key"
-#define PUBLIC_FILE_NAME "9877620cec-public.pem.key"
+#define CERTIFICATE_FILE_NAME "9877620cec-certificate.der"
 
 
 /* local variables ********************************************************** */
@@ -374,13 +374,64 @@ void flashCertificate() {
 
  // _i32 writtenLen = sl_FsWrite(fileHandle, 0, data, length);
 
+ _u32 remainingLength = 1758;
+ while(remainingLength > 0)
+ {
+      remainingLength -= sl_FsWrite(
+        fileHandle,
+        1758 - remainingLength,
+		digicert_root_crt+(1758 - remainingLength),
+        remainingLength > 1024 ? 1024 : remainingLength // equal to max(remainingLength, 1024)
+  );
+ }
+
  sl_FsClose(fileHandle, NULL, NULL, 0);
+
+
+
+
+
+  sl_FsOpen(
+  (_u8*) PRIVATE_FILE_NAME,
+  FS_MODE_OPEN_CREATE( 1024, _FS_FILE_PUBLIC_WRITE | _FS_FILE_PUBLIC_READ ),
+  NULL,
+  &fileHandle );
+ // If the file is longer than 1024 bytes, you need to loop the writing.
+ // "length" contains the length of the certificate
+ // "writtenLength" contains the amount of actually written bytes.
+
+
+  // _i32 writtenLen = sl_FsWrite(fileHandle, 0, data, length);
+
+remainingLength = 1679;
+  while(remainingLength > 0)
+  {
+       remainingLength -= sl_FsWrite(
+         fileHandle,
+         1679 - remainingLength,
+		 digicert_pvt_crt+(1679 - remainingLength),
+         remainingLength > 1024 ? 1024 : remainingLength // equal to max(remainingLength, 1024)
+   );
+  }
+
+  sl_FsClose(fileHandle, NULL, NULL, 0);
+
+
+
+   sl_FsOpen(
+   (_u8*) CERTIFICATE_FILE_NAME,
+   FS_MODE_OPEN_CREATE( 1024, _FS_FILE_PUBLIC_WRITE | _FS_FILE_PUBLIC_READ ),
+   NULL,
+   &fileHandle );
+
+   sl_FsWrite(fileHandle,0, digicert_pub_crt,1024);
+
 }
 
 // Call this function after flashCertificate() in appInitSystem()
 void sendGetRequest(_i16 socketHandle, char* host, char* path)
 {
- char outBuf[1024];
+ char outBuf[512];
  char inBuf[1024];
  _i16 bytesSent = 0;
  _i16 bytesReceived = 0;
@@ -435,6 +486,18 @@ void connectServerSecure(void){
  PAL_getIpaddress((uint8_t*) HOST_NAME, &destAddr);
  // Creating a Socket (socketHandle ≦ 0 indicates an error):
  _i16 socketHandle = sl_Socket(SL_AF_INET, SL_SOCK_STREAM, SL_SEC_SOCKET);
+
+ //tell the simplelink chip to use TLS for that socket
+ SlSockSecureMethod secMethod;
+ secMethod.secureMethod = SL_SO_SEC_METHOD_SSLv3_TLSV1_2;
+ sl_SetSockOpt(
+     socketHandle,
+     SL_SOL_SOCKET,
+     SL_SO_SECMETHOD,
+     (_u8 *)&secMethod,
+     sizeof(secMethod)
+ );
+
  // Adding the certificate to the socket:
  sl_SetSockOpt(
  socketHandle,
@@ -457,9 +520,9 @@ void connectServerSecure(void){
  sl_SetSockOpt(
   socketHandle,
   SL_SOL_SOCKET,
-  SL_SO_SECURE_CERTIFICATE_FILE_NAME,
-  PUBLIC_FILE_NAME,
-  strlen(PUBLIC_FILE_NAME)
+  SL_SO_SECURE_FILES_CERTIFICATE_FILE_NAME,
+  CERTIFICATE_FILE_NAME,
+  strlen(CERTIFICATE_FILE_NAME)
   );
  // Configuration the connection settings (IP, Port, etc.):
  SlSockAddrIn_t addr;
