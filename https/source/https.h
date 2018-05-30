@@ -1,6 +1,6 @@
 /*
-* Licensee agrees that the example code provided to Licensee has been developed and released by Bosch solely as an example to be used as a potential reference for Licensee’s application development. 
-* Fitness and suitability of the example code for any use within Licensee’s applications need to be verified by Licensee on its own authority by taking appropriate state of the art actions and measures (e.g. by means of quality assurance measures).
+* Licensee agrees that the example code provided to Licensee has been developed and released by Bosch solely as an example to be used as a potential reference for Licenseeï¿½s application development. 
+* Fitness and suitability of the example code for any use within Licenseeï¿½s applications need to be verified by Licensee on its own authority by taking appropriate state of the art actions and measures (e.g. by means of quality assurance measures).
 * Licensee shall be responsible for conducting the development of its applications as well as integration of parts of the example code into such applications, taking into account the state of the art of technology and any statutory regulations and provisions applicable for such applications. Compliance with the functional system requirements and testing there of (including validation of information/data security aspects and functional safety) and release shall be solely incumbent upon Licensee. 
 * For the avoidance of doubt, Licensee shall be responsible and fully liable for the applications and any distribution of such applications into the market.
 * 
@@ -47,7 +47,7 @@
 /* local interface declaration ********************************************** */
  /* Priorities */
 #define TASK_PRIO_MAIN_CMD_PROCESSOR                (UINT32_C(1))
-#define TASK_STACK_SIZE_MAIN_CMD_PROCESSOR          (UINT16_C(700))
+#define TASK_STACK_SIZE_MAIN_CMD_PROCESSOR          (UINT16_C(1024))
 #define TASK_Q_LEN_MAIN_CMD_PROCESSOR                (UINT32_C(10))
 /* local type and macro definitions */
 
